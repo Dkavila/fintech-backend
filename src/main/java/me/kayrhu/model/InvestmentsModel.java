@@ -1,4 +1,4 @@
-package src.me.kayrhu.model;
+package me.kayrhu.model;
 
 import java.util.Date;
 
@@ -80,7 +80,7 @@ public class InvestmentsModel {
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         return "InvestmentsModel{" +
                 "investmentId='" + investmentId + '\'' +
                 "userCode='" + userCode + '\'' +

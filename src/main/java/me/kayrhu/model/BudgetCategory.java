@@ -1,4 +1,4 @@
-package src.me.kayrhu.model;
+package me.kayrhu.model;
 
 public enum BudgetCategory {
     REVENUE,

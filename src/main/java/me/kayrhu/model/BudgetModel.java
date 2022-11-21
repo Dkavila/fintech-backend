@@ -1,4 +1,4 @@
-package src.me.kayrhu.model;
+package me.kayrhu.model;
 
 import java.util.Date;
 
@@ -77,7 +77,7 @@ public class BudgetModel {
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         return "budgetModel{" +
                 "budgetId=" + budgetId +
                 "userCode=" + userCode +

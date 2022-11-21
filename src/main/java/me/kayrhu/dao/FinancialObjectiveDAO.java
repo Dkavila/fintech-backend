@@ -1,12 +1,14 @@
-package src.me.kayrhu.dao;
+package me.kayrhu.dao;
 
-import src.me.kayrhu.model.FinancialObjectiveModel;
+import me.kayrhu.model.FinancialObjectiveModel;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FinancialObjectiveDAO {
+
+    FinancialObjectiveDAO(){}
     public static boolean deleteFinancialObjective(int id) {
         String sql = "DELETE FROM t_sif_objetivos_financeiros WHERE cd_objetivo_financeiro = " + id;
         boolean deleted = false;
@@ -17,6 +19,7 @@ public class FinancialObjectiveDAO {
 
             ResultSet result = statement.executeQuery(sql);
             deleted = true;
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){
@@ -36,15 +39,17 @@ public class FinancialObjectiveDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
-
-            financialObjective = new FinancialObjectiveModel(
-                    id,
-                    result.getInt("cd_usuario"),
-                    result.getString("nm_objetivo"),
-                    result.getFloat("vl_objetivo"),
-                    result.getString("tx_descricao"),
-                    result.getDate("dt_meta_objetivo")
-            );
+            if(result.next()) {
+                financialObjective = new FinancialObjectiveModel(
+                        id,
+                        result.getInt("cd_usuario"),
+                        result.getString("nm_objetivo"),
+                        result.getFloat("vl_objetivo"),
+                        result.getString("tx_descricao"),
+                        result.getDate("dt_meta_objetivo")
+                );
+            }
+            connection.close();
 
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
@@ -76,6 +81,7 @@ public class FinancialObjectiveDAO {
                         result.getDate("dt_meta_objetivo")
                 );
             }
+            connection.close();
 
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
@@ -101,7 +107,7 @@ public class FinancialObjectiveDAO {
             statement.setString(2, financialObjective.getObjectiveName());
             statement.setFloat(3, financialObjective.getObjectiveValue());
             statement.setString(4, financialObjective.getDescription());
-            statement.setDate(5, (Date)financialObjective.getObjectiveGoal());
+            statement.setDate(5, UtilsDAO.convertToSQLDate(financialObjective.getObjectiveGoal()));
 
             statement.execute();
 
@@ -123,7 +129,7 @@ public class FinancialObjectiveDAO {
                 " nm_objetivo = " + financialObjective.getObjectiveName() +
                 " vl_objetivo = " + financialObjective.getObjectiveValue() +
                 " tx_descricao = " + financialObjective.getDescription() +
-                " dt_meta_objetivo = " + financialObjective.getObjectiveGoal() +
+                " dt_meta_objetivo = " + UtilsDAO.convertToSQLDate(financialObjective.getObjectiveGoal()) +
                 " WHERE cd_usuario = " + financialObjective.getUserCode();
         try{
             Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -131,6 +137,7 @@ public class FinancialObjectiveDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){

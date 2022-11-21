@@ -1,12 +1,15 @@
-package src.me.kayrhu.dao;
+package me.kayrhu.dao;
 
-import src.me.kayrhu.model.InvestmentsModel;
+import me.kayrhu.model.InvestmentsModel;
+import me.kayrhu.dao.UtilsDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InvestmentsDAO {
+
+    InvestmentsDAO(){}
     public static boolean deleteInvestment(int id) {
         String sql = "DELETE FROM t_sif_investimentos WHERE cd_investimento = " + id;
         boolean deleted = false;
@@ -17,6 +20,7 @@ public class InvestmentsDAO {
 
             ResultSet result = statement.executeQuery(sql);
             deleted = true;
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){
@@ -36,16 +40,18 @@ public class InvestmentsDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
-
-            investment = new InvestmentsModel(
-                    id,
-                    result.getInt("cd_usuario"),
-                    result.getString("nm_aplicacao_financeira"),
-                    result.getFloat("vl_aplicacao"),
-                    result.getString("nm_banco"),
-                    result.getDate("dt_investimento"),
-                    result.getDate("dt_vencimento_investimento")
-            );
+            if(result.next()) {
+                investment = new InvestmentsModel(
+                        id,
+                        result.getInt("cd_usuario"),
+                        result.getString("nm_aplicacao_financeira"),
+                        result.getFloat("vl_aplicacao"),
+                        result.getString("nm_banco"),
+                        result.getDate("dt_investimento"),
+                        result.getDate("dt_vencimento_investimento")
+                );
+            }
+            connection.close();
 
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
@@ -80,6 +86,8 @@ public class InvestmentsDAO {
                 investments.add(investment);
             }
 
+            connection.close();
+
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){
@@ -104,8 +112,8 @@ public class InvestmentsDAO {
             statement.setFloat(2, investment.getApplicantValue());
             statement.setString(3, investment.getFinancialApplicant());
             statement.setString(4, investment.getBank());
-            statement.setDate(5, (Date)investment.getInvestmentDate());
-            statement.setDate(6, (Date)investment.getInvestmentDueDate());
+            statement.setDate(5, UtilsDAO.convertToSQLDate(investment.getInvestmentDate()));
+            statement.setDate(6, UtilsDAO.convertToSQLDate(investment.getInvestmentDueDate()));
 
             statement.execute();
 
@@ -125,8 +133,8 @@ public class InvestmentsDAO {
         String sql = "UPDATE t_sif_investimentos SET" +
                 " cd_usuario = " + investment.getUserCode() +
                 " nm_aplicacao_financeira = " + investment.getFinancialApplicant() +
-                " dt_investimento = " + investment.getInvestmentDate() +
-                " dt_vencimento_investimento = " + investment.getInvestmentDueDate() +
+                " dt_investimento = " + UtilsDAO.convertToSQLDate(investment.getInvestmentDate()) +
+                " dt_vencimento_investimento = " + UtilsDAO.convertToSQLDate(investment.getInvestmentDueDate()) +
                 " nm_banco = " + investment.getBank() +
                 " vl_aplicacao = " + investment.getApplicantValue() +
                 " WHERE cd_usuario = " + investment.getUserCode();
@@ -136,6 +144,7 @@ public class InvestmentsDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){

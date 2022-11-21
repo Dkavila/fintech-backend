@@ -1,13 +1,16 @@
-package src.me.kayrhu.dao;
+package me.kayrhu.dao;
 
-import src.me.kayrhu.model.BudgetCategory;
-import src.me.kayrhu.model.BudgetModel;
+import me.kayrhu.model.BudgetCategory;
+import me.kayrhu.model.BudgetModel;
+import org.springframework.context.annotation.Bean;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BudgetDAO {
+
+    BudgetDAO(){}
     public static boolean deleteBudget(int id) {
         String sql = "DELETE FROM t_sif_orcamento WHERE cd_orcamento = " + id;
         boolean deleted = false;
@@ -18,6 +21,7 @@ public class BudgetDAO {
 
             ResultSet result = statement.executeQuery(sql);
             deleted = true;
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){
@@ -37,15 +41,17 @@ public class BudgetDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
-
-            budgetModel = new BudgetModel(
-                    id,
-                    result.getInt("cd_usuario"),
-                    result.getFloat("vl_orcamento"),
-                    BudgetCategory.valueOf(result.getString("in_categoria")),
-                    result.getDate("dt_orcamento"),
-                    result.getString("tx_descricao")
-            );
+            if(result.next()) {
+                budgetModel = new BudgetModel(
+                        id,
+                        result.getInt("cd_usuario"),
+                        result.getFloat("vl_orcamento"),
+                        BudgetCategory.valueOf(result.getString("in_categoria")),
+                        result.getDate("dt_orcamento"),
+                        result.getString("tx_descricao")
+                );
+            }
+            connection.close();
 
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
@@ -78,6 +84,7 @@ public class BudgetDAO {
                 );
                 budgets.add(budgetModel);
             }
+            connection.close();
 
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
@@ -101,7 +108,7 @@ public class BudgetDAO {
 
             statement.setInt(1, budgetModel.getUserCode());
             statement.setFloat(2, budgetModel.getbudgetValue());
-            statement.setDate(3, (Date)budgetModel.getbudgetDate());
+            statement.setDate(3, UtilsDAO.convertToSQLDate(budgetModel.getbudgetDate()));
             statement.setString(4, budgetModel.getCategory().toString());
             statement.setString(5, budgetModel.getDescription());
 
@@ -123,7 +130,7 @@ public class BudgetDAO {
         String sql = "UPDATE t_sif_orcamento SET" +
                 " cd_usuario = " + budgetModel.getUserCode() +
                 " vl_orcamento = " + budgetModel.getbudgetValue() +
-                " dt_orcamento = " + budgetModel.getbudgetDate() +
+                " dt_orcamento = " + UtilsDAO.convertToSQLDate(budgetModel.getbudgetDate()) +
                 " in_categoria = " + budgetModel.getCategory() +
                 " tx_descricao = " + budgetModel.getDescription() +
                 " WHERE cd_usuario = " + budgetModel.getBudgetId();
@@ -133,6 +140,7 @@ public class BudgetDAO {
             Statement statement = connection.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
+            connection.close();
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found!");
         } catch (Exception e){
